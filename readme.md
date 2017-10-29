@@ -6,6 +6,10 @@ https://www.bilibili.com/ranking#!/all/0/1/7/
 抓下来的数据结构大概这样    
 ![](./imgs/881508317096_.pic.jpg)
 
+| 视频id | 作者id | 播放数  | 弹幕数        | 硬币数   | 最高排名 | 收藏数     | 分享数   | 评论数     |
+| :--: | :--: | ---- | ---------- | ----- | ---- | ------- | ----- | ------- |
+| aid  | mid  | play | deo_review | coins | 无    | collect | share | comment |
+
 https://www.bilibili.com/index/rank/all-07-0.json
 
 ## part2
@@ -18,10 +22,20 @@ https://www.bilibili.com/video/av14534728/
 
 https://api.bilibili.com/x/tag/archive/tags?aid=14534728&jsonp=jsonp
 
+| 视频ID | 视频名称       | 视频标签     | 顶     | 踩     |
+| ---- | ---------- | -------- | ----- | ----- |
+| 文件名  | 对应top100的表 | tag_name | likes | hates |
+
+
+
 ## part3
 然后我还需要每个标签的修改记录
 ![](./imgs/1331508317934_.pic.jpg)
 https://api.bilibili.com/x/tag/archive/log?&aid=14534728&pn=1&ps=20&jsonp=jsonp
+
+| 视频ID | 用户id | 时间     | 操作     | 标签              |
+| ---- | ---- | ------ | ------ | --------------- |
+| aid  | mid  | c_time | action | tag_id tag_name |
 
 ## part4
 然后我需要每个参与了标签修改的用户的信息

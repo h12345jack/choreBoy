@@ -1,0 +1,9 @@
+venv/
+excels/
+htmls/
+jsons/
+phantomjs/
+*.json
+*.rar
+*.log
+
