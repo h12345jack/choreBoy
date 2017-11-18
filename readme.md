@@ -50,6 +50,8 @@ https://api.bilibili.com/x/tag/archive/log?&aid=14534728&pn=1&ps=20&jsonp=jsonp
 
 完成时间时2017年11月30日
 
+## 2017111
+师姐反应在抓取日志信息时，只能获取到up主提交的信息，不能获取别人的信息。。。需要修bugs
 
 
 
