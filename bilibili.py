@@ -44,11 +44,21 @@ if not os.path.exists("jsons"):
 if not os.path.exists("excels"):
     os.mkdir("excels")
 
+
+
+class BilibiliTask(object):
+    """docstring for BilibiliTask"""
+    def __init__(self, arg):
+        super(BilibiliTask, self).__init__()
+        self.arg = arg
+
+
+
 def getHtml(aid, driver):
     url = "https://www.bilibili.com/video/av{}/".format(aid)
     driver.get(url)
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    time.sleep(5)
+    time.sleep(0.5)
     content = driver.page_source.encode('utf8')
     with open('./htmls/{}.html'.format(aid), 'wb') as f:
             f.write(content)
@@ -62,45 +72,65 @@ def getHtml(aid, driver):
     item["breadcrumb"] = "".join([i for i in dom.xpath('//div[@class="tminfo"]//text()')])
     return item
 
-def getRank():
-    '''json数据'''
-    url = 'https://www.bilibili.com/index/rank/all-07-0.json'
-    req = requests.get(url, headers = HEADERS1)
-    content = req.content
-    now = time.time()
-    with open('all-07-0.json','wb') as f:
-        f.write(content)
-    json_data = json.loads(content)
-    data = json_data["rank"]["list"]
-    driver=webdriver.PhantomJS('./phantomjs/phantomjs.exe',service_args=['--load-images=no','--disk-cache=yes'])
-    for item in data:
-        aid = item["aid"]
-        item2 = getHtml(aid, driver)
-        for tmp in item2:
-            item[tmp] = item2[tmp]
-        getVideoTags(aid)
-        getTagLog(aid)
-        print(aid)
-        # break
-
-    df = pd.DataFrame(data)
-    df.to_excel('top100.xlsx')
+def getRank(driver, chrome_driver):
+    '''json数据
+    parts = ["all-30-0","all-30-1","all-30-168","all-30-3","all-30-129","all-30-4",\
+             "all-30-36","all-30-160","all-30-119","all-30-155","all-30-5","all-30-181"]
 
 
+    '''
+
+    parts = ["all-30-3","all-30-129","all-30-4",\
+             "all-30-36","all-30-160","all-30-119","all-30-155","all-30-5","all-30-181"]
 
 
-def getVideoTags(aid):
+    for part in parts:
+        if os.path.exists('{}-top100.xlsx'.format(part)):
+            continue
+        url = 'https://www.bilibili.com/index/rank/{}.json'.format(part)
+        print(url)
+        req = requests.get(url, headers = HEADERS1)
+        content = req.content
+        now = time.time()
+        with open('{}.json'.format(part),'wb') as f:
+            f.write(content)
+        json_data = json.loads(content, encoding='utf8')
+        data = json_data["rank"]["list"]
+        for item in data:
+            aid = item["aid"]
+            item2 = getHtml(aid, driver)
+            for tmp in item2:
+                item[tmp] = item2[tmp]
+            getVideoTags(aid, chrome_driver)
+            getTagLog(aid)
+            print(aid)
+            # break
+        df = pd.DataFrame(data)
+        df.to_excel('{}-top100.xlsx'.format(part))
+        print(part, 'done!')
+        time.sleep(5)
+
+
+
+def getVideoTags(aid, driver):
     url = "http://api.bilibili.com/x/tag/archive/tags?aid={}&jsonp=jsonp".format(aid)
-    req = requests.get(url.strip(), headers = HEADERS2)
-    content = req.content
-    print(content)
-    f_path = os.path.join('jsons', aid+'-tags.json')
+    req = driver.get(url.strip())
+    html_page = driver.page_source.encode('utf8')
+    f_path = os.path.join('htmls', aid+'-tags.html')
     with open(f_path, 'wb') as f:
-        f.write(content)
-    json_data = json.loads(content)
+        f.write(html_page)
+
+    dom = html.fromstring(html_page.decode('utf8')) 
+    content = dom.xpath("//pre/text()")[0]  
+    json_data = json.loads(content, encoding='utf8')
+
+    f_path = os.path.join('jsons', aid+'-tags.json')
+    with open(f_path, 'w') as f:
+        f.write(json.dumps(json_data))
     data = json_data["data"]
     df = pd.DataFrame(data)
-    df.to_excel('./excels/{}-tags.xlsx'.format(aid))
+    df.to_excel('./excels/{}-tags.xlsx'.format(aid), encoding='utf8')
+
 
 def getTagLog(aid):
     datas = []
@@ -112,7 +142,7 @@ def getTagLog(aid):
         f_path = os.path.join('jsons', aid+'-logs-{}.json'.format(i))
         with open(f_path, 'wb') as f:
             f.write(content)
-        json_data = json.loads(content)
+        json_data = json.loads(content, encoding='utf8')
         data = json_data["data"]
         if isinstance(data,list) and len(data)>0:
             datas.extend(data)
@@ -124,10 +154,31 @@ def getTagLog(aid):
 
 
 
+def validate():
+    f_lists = [i for i in os.listdir('.') if i.find('.xlsx') > -1]
+    for fname in f_lists:
+        df = pd.read_excel(fname)
+        aids = df["aid"].tolist()
+        for aid in aids:
+            a = os.path.exists("./excels/"+str(aid)+"-logs.xlsx")
+            b = os.path.exists("./excels/"+str(aid)+"-tags.xlsx")
+            if (not a) or (not b):
+                print(aid)
+
+
 def main():
-    # getRank()
+    phantom_driver=webdriver.PhantomJS('./phantomjs/phantomjs.exe',service_args=['--load-images=no','--disk-cache=yes'])
+    profile_dir = r'C:\Users\Jackhuang\AppData\Local\Google\Chrome\User Data'
+    option = webdriver.ChromeOptions()
+    option.add_argument(r'--user-data-dir='+os.path.abspath(profile_dir)) 
+    chrome_driver = webdriver.Chrome('./phantomjs/chromedriver.exe',chrome_options=option)
     # getTagLog("15751210")
-    getVideoTags("15751210")
+    # getRank(phantom_driver)
+    getRank(phantom_driver, chrome_driver)
+    # getVideoTags("15673566", chrome_driver)
+    chrome_driver.close()
+    phantom_driver.close()
+
 
 
 if __name__ == '__main__':

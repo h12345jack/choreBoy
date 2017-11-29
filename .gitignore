@@ -2,8 +2,10 @@ venv/
 excels/
 htmls/
 jsons/
+old-datas/
 phantomjs/
 *.json
 *.rar
 *.log
+*.xlsx
 
