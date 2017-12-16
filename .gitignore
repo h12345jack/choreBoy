@@ -1,5 +1,9 @@
 venv/
 excels/
+tsv/
+people/
+people_json/
+back_up/
 htmls/
 jsons/
 old-datas/
@@ -8,4 +12,4 @@ phantomjs/
 *.rar
 *.log
 *.xlsx
-
+*.tsv
