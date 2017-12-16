@@ -28,6 +28,9 @@ HEADERS1 = {
 
 if not os.path.exists("people"):
     os.mkdir("people")
+    
+if not os.path.exists("people_json"):
+    os.mkdir("people_json")
 
 class favlist_rendered(object):
 
@@ -38,8 +41,6 @@ class favlist_rendered(object):
     def __call__(self, driver):
         ele1 = driver.find_element(*self.locator1)   # Finding the referenced element
         ele2 = driver.find_element(*self.locator2)
-        print(ele1, 45)
-        print(ele2, 46)
         if ele1:
             return True
         elif ele2:
@@ -254,11 +255,25 @@ def main1():
     # # bili.getHtml(aid='16874218')
     bili.quit()
 
-def main2():
-    user_list = getUsers()
-    with open('user_list.txt', 'w') as f:
-        for user in user_list:
-            f.write(str(user)+'\n')
+def main():
+    user_list = []
+
+    with open('user_list.txt') as f:
+        for user in f.readlines():
+            user_list.append(user)
+
+    # userlist
+    bili = BilibiliPeopleTask()
+       
+    for user in user_list:
+        user_json_path = os.path.join('people_json', str(user)+'.json')
+        if not os.path.exists(user_json_path):
+            with open(user_json_path, 'w') as f:
+                item = bili.getHtml(user)
+                f.write(json.dumps(item) + '\n')
+                print(user, 'done')
+
+    bili.quit()
 
 if __name__ == '__main__':
-    main2()
+    main()
