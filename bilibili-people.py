@@ -30,64 +30,69 @@ if not os.path.exists("people"):
     os.mkdir("people")
 
 class favlist_rendered(object):
-  """An expectation for checking that an element has a particular css class.
 
-  locator - used to find the element
-  returns the WebElement once it has the particular css class
-  """
-  def __init__(self, locator1, locator2):
-    self.locator1 = locator1
-    self.locator2 = locator2
+    def __init__(self, locator1, locator2):
+        self.locator1 = locator1
+        self.locator2 = locator2
 
-  def __call__(self, driver):
-    print(driver.find_element_by_xpath(self.locator1))
-    ele1 = driver.find_element_by_xpath(self.locator1)   # Finding the referenced element
-    ele2 = dirver.find_element_by_xpath(self.locator2)
-    return ele1 or ele2
+    def __call__(self, driver):
+        ele1 = driver.find_element(*self.locator1)   # Finding the referenced element
+        ele2 = driver.find_element(*self.locator2)
+        print(ele1, 45)
+        print(ele2, 46)
+        if ele1:
+            return True
+        elif ele2:
+            return True
+        else:
+            return False
 
 
 class BilibiliPeopleTask(object):
     """docstring for BilibiliTask"""
     def __init__(self):
         super(BilibiliPeopleTask, self).__init__()
-        self.init_phantomjs()
-        self.init_phantomjs2()
+        self.init_chrome1()
+        self.init_chrome2()
 
 
-    def init_phantomjs(self):
-        dcap = dict(DesiredCapabilities.PHANTOMJS)
-        dcap["phantomjs.page.settings.userAgent"] = (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
-        )
-        self.phantom_driver = webdriver.PhantomJS('./phantomjs/phantomjs.exe',service_args=['--load-images=no','--disk-cache=yes','--ignore-ssl-errors=true', '--ssl-protocol=TLSv1'], desired_capabilities=dcap)
-        self.phantom_driver.set_page_load_timeout(10)
+    def init_chrome1(self):
+        option = webdriver.ChromeOptions()
+        prefs = {"profile.managed_default_content_settings.images":2}
+        option.add_argument("--disable-extensions")
+        option.add_argument("--disable-gpu")
+        option.add_argument("--headless") 
+        option.add_experimental_option("prefs",prefs)
+        self.chrome_driver1 = webdriver.Chrome('./phantomjs/chromedriver.exe',chrome_options=option)
 
-    def init_phantomjs2(self):
-        dcap = dict(DesiredCapabilities.PHANTOMJS)
-        dcap["phantomjs.page.settings.userAgent"] = (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
-        )
-        self.phantom_driver2 = webdriver.PhantomJS('./phantomjs/phantomjs2.exe',service_args=['--load-images=no','--disk-cache=yes','--ignore-ssl-errors=true', '--ssl-protocol=TLSv1'], desired_capabilities=dcap)
-        self.phantom_driver2.set_page_load_timeout(10)
-   
+    def init_chrome2(self):
+        option = webdriver.ChromeOptions()
+        prefs = {"profile.managed_default_content_settings.images":2}
+        option.add_argument("--disable-extensions")
+        option.add_argument("--disable-gpu")
+        option.add_argument("--headless") 
+        option.add_experimental_option("prefs",prefs)
+        self.chrome_driver2 = webdriver.Chrome('./phantomjs/chromedriver.exe',chrome_options=option)
+
+
     def getHtml(self, mid):
         url = "https://space.bilibili.com/{}#/".format(mid)
         time_try = 20
         while time_try:
             try:
-                self.phantom_driver.get(url.strip())
-                self.phantom_driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-                element = WebDriverWait(self.phantom_driver, 10).until(
+                self.chrome_driver1.get(url.strip())
+                self.chrome_driver1.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                element = WebDriverWait(self.chrome_driver1, 10).until(
                     EC.presence_of_element_located((By.XPATH, '//div[@class="s-space"]'))
                 )
             except Exception as e:
                 print(url, e)
                 time_try -= 1
                 time.sleep(1.5)
-                self.phantom_driver.quit()
-                self.init_phantomjs()
+                self.chrome_driver1.quit()
+                self.init_chrome1()
             else:
-                content = self.phantom_driver.page_source.encode('utf8')
+                content = self.chrome_driver1.page_source.encode('utf8')
                 with open('./people/{}.html'.format(mid), 'wb') as f:
                         f.write(content)
 
@@ -164,20 +169,20 @@ class BilibiliPeopleTask(object):
         time_try = 20
         while time_try:
             try:
-                self.phantom_driver2.get(url.strip())
-                self.phantom_driver2.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-                element = WebDriverWait(self.phantom_driver2, 10).until(
-                    EC.presence_of_all_elements_located((By.XPATH, '//ul[@class="fav-list"]/li'))
-                    # favlist_rendered('//div[@class="wrapper guest full-fav-empty"]','//ul[@class="fav-list"]')
+                self.chrome_driver2.get(url.strip())
+                self.chrome_driver2.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                element = WebDriverWait(self.chrome_driver2, 10).until(
+                    # EC.presence_of_all_elements_located((By.XPATH, '//ul[@class="fav-list"]/li'))
+                    favlist_rendered((By.XPATH, '//div[@class="search-empty-hint"]'),(By.XPATH, '//ul[@class="fav-list"]'))
                 )
             except Exception as e:
                 print(url, e)
                 time_try -= 1
                 time.sleep(1.5)
-                self.phantom_driver2.quit()
-                self.init_phantomjs2()
+                self.chrome_driver2.quit()
+                self.init_chrome2()
             else:
-                content = self.phantom_driver2.page_source.encode('utf8')
+                content = self.chrome_driver2.page_source.encode('utf8')
                 with open('./people/{}-favlist.html'.format(mid), 'wb') as f:
                         f.write(content)
                 li_xpath = '//ul[@class="fav-list"]/li'
@@ -193,7 +198,8 @@ class BilibiliPeopleTask(object):
 
 
     def quit(self):
-        self.phantom_driver.quit()
+        self.init_chrome1.quit()
+        self.init_chrome2.quit()
 
 
 
@@ -222,7 +228,7 @@ def getUsers():
 
     return mid_rs
 
-def main():
+def main1():
     test = ['9331087', '777536', '31273277']
     v = [198, 0, 68]
     user_list = getUsers()
@@ -248,5 +254,11 @@ def main():
     # # bili.getHtml(aid='16874218')
     bili.quit()
 
+def main2():
+    user_list = getUsers()
+    with open('user_list.txt', 'w') as f:
+        for user in user_list:
+            f.write(str(user)+'\n')
+
 if __name__ == '__main__':
-    main()
+    main2()
