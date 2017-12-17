@@ -48,6 +48,13 @@ class favlist_rendered(object):
         else:
             return False
 
+# 加入一个全0丢色子的机制
+class homepage_rendered(object):
+    pass
+
+
+
+
 
 class BilibiliPeopleTask(object):
     """docstring for BilibiliTask"""
@@ -83,9 +90,12 @@ class BilibiliPeopleTask(object):
             try:
                 self.chrome_driver1.get(url.strip())
                 self.chrome_driver1.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-                element = WebDriverWait(self.chrome_driver1, 10).until(
-                    EC.presence_of_element_located((By.XPATH, '//div[@class="s-space"]'))
-                )
+                # element = WebDriverWait(self.chrome_driver1, 10).until(
+                #     EC.presence_of_element_located((By.XPATH, '//div[@class="s-space"]'))
+                # )
+                # 直接等待5s算了
+                self.chrome_driver1.implicitly_wait(5)
+
             except Exception as e:
                 print(url, e)
                 time_try -= 1
@@ -174,7 +184,7 @@ class BilibiliPeopleTask(object):
                 self.chrome_driver2.execute_script("window.scrollTo(0, document.body.scrollHeight);")
                 element = WebDriverWait(self.chrome_driver2, 10).until(
                     # EC.presence_of_all_elements_located((By.XPATH, '//ul[@class="fav-list"]/li'))
-                    favlist_rendered((By.XPATH, '//div[@class="search-empty-hint"]'),(By.XPATH, '//ul[@class="fav-list"]'))
+                    favlist_rendered((By.XPATH, '//div[@class="search-empty-hint"]'),(By.XPATH, '//ul[@class="fav-list"]/li'))
                 )
             except Exception as e:
                 print(url, e)
@@ -199,8 +209,8 @@ class BilibiliPeopleTask(object):
 
 
     def quit(self):
-        self.init_chrome1.quit()
-        self.init_chrome2.quit()
+        self.chrome_driver1.quit()
+        self.chrome_driver2.quit()
 
 
 
@@ -230,17 +240,11 @@ def getUsers():
     return mid_rs
 
 def test():
-    test = ['9331087', '777536', '31273277']
-    v = [198, 0, 68]
-    user_list = getUsers()
+    test = ['9331087', '10291100', '31273277']
 
-
-    # userlist
     bili = BilibiliPeopleTask()
        
-
-
-    item = bili.getCollectNumber(9331087)
+    item = bili.getCollectNumber(100943576)
     # item = bili.getHtml(16105473)
     # item = bili.getHtml(777536)
 
@@ -272,4 +276,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    test()
