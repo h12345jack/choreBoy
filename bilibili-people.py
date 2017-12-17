@@ -229,7 +229,7 @@ def getUsers():
 
     return mid_rs
 
-def main1():
+def test():
     test = ['9331087', '777536', '31273277']
     v = [198, 0, 68]
     user_list = getUsers()
@@ -238,16 +238,9 @@ def main1():
     # userlist
     bili = BilibiliPeopleTask()
        
-    for user in user_list:
-        user_json_path = os.path.join('people_json', str(user)+'.json')
-        if not os.path.exists(user_json_path):
-            with open(user_json_path, 'w') as f:
-                item = bili.getHtml(user)
-                f.write(json.dumps(item) + '\n')
-                print(user, 'done')
 
 
-    # # item = bili.getCollectNumber(9331087)
+    item = bili.getCollectNumber(9331087)
     # item = bili.getHtml(16105473)
     # item = bili.getHtml(777536)
 
@@ -260,7 +253,7 @@ def main():
 
     with open('user_list.txt') as f:
         for user in f.readlines():
-            user_list.append(user)
+            user_list.append(user.strip())
 
     # userlist
     bili = BilibiliPeopleTask()
@@ -274,6 +267,9 @@ def main():
                 print(user, 'done')
 
     bili.quit()
+
+
+
 
 if __name__ == '__main__':
     main()
