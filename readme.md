@@ -40,6 +40,7 @@ https://api.bilibili.com/x/tag/archive/log?&aid=14534728&pn=1&ps=20&jsonp=jsonp
 ## part4
 然后我需要每个参与了标签修改的用户的信息
 ![](./imgs/1381508317989_.pic.jpg)
+
 | 中文含义 | 用户id | 性别 | 注册时间 | 关注数 | 粉丝数 | 收藏视频数 | 视频数 | 用户等级 | 播放数 | 订阅 | 专栏数 | 频道数 | 
 | ---- | ---- | ---- |  ---- |  ---- |  ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
 | 字段 | user_id  | gender  | regtime | guanzhu | fan | collection_num | video | vip | bofang | dingyue | zhualan | channel |  

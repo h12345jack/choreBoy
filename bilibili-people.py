@@ -40,10 +40,10 @@ class favlist_rendered(object):
 
     def __call__(self, driver):
         ele1 = driver.find_element(*self.locator1)   # Finding the referenced element
-        ele2 = driver.find_element(*self.locator2)
         if ele1:
             return True
-        elif ele2:
+        ele2 = driver.find_element(*self.locator2)
+        if ele2:
             return True
         else:
             return False
@@ -182,16 +182,18 @@ class BilibiliPeopleTask(object):
             try:
                 self.chrome_driver2.get(url.strip())
                 self.chrome_driver2.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-                element = WebDriverWait(self.chrome_driver2, 10).until(
-                    # EC.presence_of_all_elements_located((By.XPATH, '//ul[@class="fav-list"]/li'))
-                    favlist_rendered((By.XPATH, '//div[@class="search-empty-hint"]'),(By.XPATH, '//ul[@class="fav-list"]/li'))
-                )
+                # element = WebDriverWait(self.chrome_driver2, 10).until(
+                #     # EC.presence_of_all_elements_located((By.XPATH, '//ul[@class="fav-list"]/li'))
+                #     favlist_rendered((By.XPATH, '//div[@class="search-empty-hint"]/p'),(By.XPATH, '//ul[@class="fav-list"]/li'))
+                # )
+                self.chrome_driver2.implicitly_wait(5)
             except Exception as e:
                 print(url, e)
                 time_try -= 1
                 time.sleep(1.5)
-                self.chrome_driver2.quit()
-                self.init_chrome2()
+                if time_try < 15:
+                    self.chrome_driver2.quit()
+                    self.init_chrome2()
             else:
                 content = self.chrome_driver2.page_source.encode('utf8')
                 with open('./people/{}-favlist.html'.format(mid), 'wb') as f:
@@ -244,7 +246,8 @@ def test():
 
     bili = BilibiliPeopleTask()
        
-    item = bili.getCollectNumber(100943576)
+    item = bili.getCollectNumber(16105473)
+    # item = bili.getCollectNumber(2367492)
     # item = bili.getHtml(16105473)
     # item = bili.getHtml(777536)
 
@@ -276,4 +279,4 @@ def main():
 
 
 if __name__ == '__main__':
-    test()
+    main()
